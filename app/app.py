@@ -53,6 +53,22 @@ def employee(employee_id):
         db.session.delete(employee)
         db.session.commit()
         return jsonify({'message': 'Employee deleted successfully'})
+    
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+
+    #leave routing
+@app.routes('/leave', methods=['GET', 'POST'])
+def leaves():
+        if request.method == "GET":
+
+
+
+
+
+
+
+
+
+         if __name__ == '__main__':
+          app.run(debug=True)
