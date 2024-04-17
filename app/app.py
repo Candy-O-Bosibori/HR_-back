@@ -16,31 +16,32 @@ api = Api(app)
 CORS(app)
 
 # Restful Routes
-@app.routes('/emloyees', methods=['GET', 'POST'])
-def employees():
-    if request.method == 'GET':
+class EmployeesResource(Resource):
+    def get(self):
         employees = Employee.query.all()
         return jsonify([{'id': employee.id, 'name': employee.name, 'status': employee.status} for employee in employees])
     
-    if request.method == 'POST':
+    def post(self):
         data = request.json
         if 'name' not in data or 'status' not in data:
-            return jsonify({'error': 'Name and status are require'}), 400
+            return jsonify({'error': 'Name and status are required'}), 400
         employee = Employee(name=data['name'], status=data['status'])
-
+        
         db.session.add(employee)
         db.session.commit()
         return jsonify({'message': 'Employee added successfully'}), 201
 
-@app.route('/employee/<init:employee_id>', methods=['GET', 'PATCH', 'DELETE'])
-def employee(employee_id):
-    employee = Employee.query.get_or_404(employee_id)
+class EmployeeResource(Resource):
+    def get(self, employee_id):
+        employee = Employee.query.get_or_404(employee_id)
 
-    if request.method == 'GET':
+        
         return jsonify({'id': employee.id, 'name': employee.name, 'status': employee.status})
-    
-    if request.method == 'PATCH':
+
+    def patch(self, employee_id):
+        employee = Employee.query.get_or_404(employee_id)
         data = request.json
+
         if 'name' in data:
             employee.name = data['name']
 
@@ -49,10 +50,15 @@ def employee(employee_id):
 
         db.session.commit()
         return jsonify({'message': 'Employee updated successfully'})
-    if request.method == 'DELETE':
+
+    def delete(self, employee_id):
+        employee = Employee.query.get_or_404(employee_id)
         db.session.delete(employee)
         db.session.commit()
         return jsonify({'message': 'Employee deleted successfully'})
+
+api.add_resource(EmployeesResource, '/employees')
+api.add_resource(EmployeeResource, '/employee/<int:employee_id>')
 
 if __name__ == '__main__':
     app.run(debug=True)
