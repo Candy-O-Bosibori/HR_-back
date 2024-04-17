@@ -10,7 +10,6 @@ db = SQLAlchemy()
 
 class Employee(db.Model, SerializerMixin):
     __tablename__= 'employees'
-
     # columns
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
@@ -36,20 +35,23 @@ class Employee(db.Model, SerializerMixin):
 
 # Review Table
 class Review(db.Model, SerializerMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String, nullable=False)
-    employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
+ 
+   __tablename__= 'reviews' 
 
-    employee = db.relationship('Employee', back_populates='reviews')
+   id = db.Column(db.Integer, primary_key=True)
+   description = db.Column(db.String, nullable=False)
+   employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
 
-    @validates('description')
-    def validate_description(self, key, description):
+   employee = db.relationship('Employee', back_populates='reviews')
+
+   @validates('description')
+   def validate_description(self, key, description):
         if not 5 <= len(description) <= 100:
             raise ValueError("Description must be between 5 and 100 characters.")
         return description
 
 
-    def __repr__(self):
+   def __repr__(self):
         return f"<Review {self.id}, {self.description}>"
 
 
