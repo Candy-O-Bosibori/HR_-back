@@ -16,7 +16,7 @@ api = Api(app)
 CORS(app)
 
 # Restful Routes
-class EmployeesResource(Resource):
+class Employees(Resource):
     def get(self):
         employees = Employee.query.all()
         return jsonify([{'id': employee.id, 'name': employee.name, 'status': employee.status} for employee in employees])
@@ -30,8 +30,10 @@ class EmployeesResource(Resource):
         db.session.add(employee)
         db.session.commit()
         return jsonify({'message': 'Employee added successfully'}), 201
+    
+api.add_resource(Employees, '/employees')
 
-class EmployeeResource(Resource):
+class EmployeeByID(Resource):
     def get(self, employee_id):
         employee = Employee.query.get_or_404(employee_id)
 
@@ -56,9 +58,10 @@ class EmployeeResource(Resource):
         db.session.delete(employee)
         db.session.commit()
         return jsonify({'message': 'Employee deleted successfully'})
-    
+ 
+api.add_resource(EmployeeByID, '/employees/<int:employee_id>')  
 
-class ReviewsResource(Resource):
+class Reviews(Resource):
     def get(self):
         reviews = Review.query.all()
         return jsonify([{'id': review.id, 'description': review.description, 'employee_id': review.employee_id} for review in reviews])
@@ -73,7 +76,9 @@ class ReviewsResource(Resource):
         db.session.commit()
         return {'message': 'Review added successfully'}, 201
 
-class ReviewResource(Resource):
+api.add_resource(Reviews, '/reviews')
+
+class ReviewByID(Resource):
     def get(self, review_id):
         review = Review.query.get_or_404(review_id)
         return {'id': review.id, 'description': review.description, 'employee_id': review.employee_id}
@@ -94,9 +99,7 @@ class ReviewResource(Resource):
         db.session.commit()
         return {'message': 'Review deleted successfully'}
 
-api.add_resource(ReviewsResource, '/reviews')
-api.add_resource(ReviewResource, '/reviews/<int:review_id>')
+api.add_resource(ReviewByID, '/reviews/<int:review_id>')
 
-
-         if __name__ == '__main__':
-          app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True, port=5500)
