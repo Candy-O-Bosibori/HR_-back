@@ -18,40 +18,56 @@ CORS(app)
 # Restful Routes
 class Employees(Resource):
     def get(self):
-        employees = Employee.query.all()
-        return jsonify([{'id': employee.id, 'name': employee.name, 'status': employee.status} for employee in employees])
+        employees = [employee.to_dict() for employee in Employee.query.all()]
+        return make_response(employees, 200)
     
+
     def post(self):
-        data = request.json
-        if 'name' not in data or 'status' not in data:
-            return jsonify({'error': 'Name and status are required'}), 400
-        employee = Employee(name=data['name'], status=data['status'])
+        data = request.get_json()
+        employee = Employee(
+            name=data['name'], 
+            email=data['email'],
+            role=data['role'],
+            password=data['password'],
+            department=data['department']
+            )
         
         db.session.add(employee)
         db.session.commit()
-        return jsonify({'message': 'Employee added successfully'}), 201
+        return make_response(employee.to_dict(), 201)
     
 api.add_resource(Employees, '/employees')
 
 class EmployeeByID(Resource):
-    def get(self, employee_id):
-        employee = Employee.query.get_or_404(employee_id)
-
+    def get(self, id):
+        employee = Employee.query.filter_by(id=id).first()
+        if employee is None:
+            return {"error": "Hero not found"}, 404
+        response_dict = employee.to_dict()
+        return make_response(response_dict, 200)
+    
+    # edit an employee
+    def patch(self, id):
+        # check if id excist in data base 
+        employee = Employee.query.filter_by(id=id).first()
+        if employee is None:
+            return {"error": "Employee not found"}, 404
         
-        return jsonify({'id': employee.id, 'name': employee.name, 'status': employee.status})
+        # if it does then retrieve the updated part
+        data = request.get_json()
 
-    def patch(self, employee_id):
-        employee = Employee.query.get_or_404(employee_id)
-        data = request.json
+        if all(key in data for key in ['name', 'email', 'password']):
+            try:   
+                employee.name = data['name']
+                employee.email = data['email']
+                employee.password = data['password']
+                db.session.commit()
+                return make_response(employee.to_dict(), 200)
 
-        if 'name' in data:
-            employee.name = data['name']
-
-        if 'status' in data:
-            employee.status = data['status']
-
-        db.session.commit()
-        return jsonify({'message': 'Employee updated successfully'})
+            except AssertionError:
+                return {"errors": ["validation errors"]}, 400
+        else:
+            return {"errors": ["validation errors"]}, 400
 
     def delete(self, employee_id):
         employee = Employee.query.get_or_404(employee_id)
