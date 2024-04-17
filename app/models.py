@@ -16,6 +16,7 @@ class Employee(db.Model, SerializerMixin):
     password = db.Column(db.String, nullable=False)
     department = db.Column(db.String, nullable=False)
     role = db.Column(db.String, nullable=False)
+    image = db.Column(db.String, nullable=True)
     
 
     # relationships with review and leave
