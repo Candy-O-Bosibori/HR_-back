@@ -116,11 +116,11 @@ class EmployeeByID(Resource):
         db.session.commit()
         return jsonify({'message': 'Employee deleted successfully'})
  
-api.add_resource(EmployeeByID, '/employees/<int:employee_id>')  
+api.add_resource(EmployeeByID, '/employee/<int:employee_id>')  
 
 class Reviews(Resource):
     @jwt_required()
-    def get(self):
+    def get(self):        
         reviews = Review.query.all()
         return jsonify([{'id': review.id, 'description': review.description, 'employee_id': review.employee_id} for review in reviews])
 
@@ -149,6 +149,10 @@ class ReviewByID(Resource):
 
     @jwt_required()
     def patch(self, review_id):
+        claims = get_jwt_identity()
+        if claims['role'] != 'admin':
+            return {'error': 'Only admins can add reviews'}, 403
+        
         review = Review.query.get_or_404(review_id)
         data = request.json
         if 'description' in data:
@@ -160,6 +164,10 @@ class ReviewByID(Resource):
     
     @jwt_required()
     def delete(self, review_id):
+        claims = get_jwt_identity()
+        if claims['role'] != 'admin':
+            return {'error': 'Only admins can add reviews'}, 403
+        
         review = Review.query.get_or_404(review_id)
         db.session.delete(review)
         db.session.commit()
@@ -167,8 +175,6 @@ class ReviewByID(Resource):
 
 api.add_resource(ReviewByID, '/reviews/<int:review_id>')
 
-
-#leave 
 class Leave(Resource):
     @jwt_required()
     def get(self):
