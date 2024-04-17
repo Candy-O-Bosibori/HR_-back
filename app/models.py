@@ -7,6 +7,7 @@ db = SQLAlchemy()
 
 # Define Models
 
+
 class Employee(db.Model, SerializerMixin):
     __tablename__= 'employees'
 
@@ -39,3 +40,10 @@ class Employee(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f"<Employee {self.name}, {self.email}>"
+
+class Review(db.Model, SerializerMixin):
+    __tablename__ = "reviews"
+
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String, nullable=False)
+
