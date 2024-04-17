@@ -117,5 +117,55 @@ class ReviewByID(Resource):
 
 api.add_resource(ReviewByID, '/reviews/<int:review_id>')
 
+
+#leave 
+class Leave(Resource):
+    def get(self):
+        leaves = Leave.query.all()
+        return jsonify([{'id':Leave.id, 'leavetype':Leave.leavetype, 'startdate':Leave.startdate, 'enddate':Leave.endDate, 'status':Leave.status }])
+    
+    
+    def post(self):
+        data = request.json
+        if 'leavetype' not in data or 'startdate' not in data or 'enddate' not in data:
+            return jsonify({'error': 'Leave type, start date, end date are required'}), 400
+        
+        new_leave = Leave(
+            leavetype=data['leavetype'],
+            startdate=data['startdate'],
+            enddate=data['enddate']
+        )
+        db.session.add(new_leave)
+        db.session.commit()
+        
+        return jsonify({'message': 'Leave added successfully!', 'id': new_leave.id}), 201
+    
+    # getting an error in the Leave
+    #api.add_resource(Leave, '/leave')
+    
+class LeaveById(Resource):
+    def get(self, leave_id):
+        leave = Leave.query.get_or_404(leave_id)
+        return {'id': leave.id, 'startdata': leave.startdate, 'enddate': leave.enddate, 'status': leave.leave.status}
+
+    def post(self, leave_id):
+        leave = Leave.query.get_or_404(leave_id)
+        data = request.json
+        if 'leavetype' not in data or 'startdate' not in data or 'enddate' not in data:
+            return jsonify({'error': 'Leave type, start date, end date are required'}), 400
+
+        new_leave = Leave(
+            leavetype=data['leavetype'],
+            startdate=data['startdate'],
+            enddate=data['enddate']
+        )
+        db.session.add(new_leave)
+        db.session.commit()
+
+        return jsonify({'message': 'Leave added successfully!', 'id': new_leave.id}), 201
+
+api.add_resource(LeaveById, '/leave/<int:leave_id>')
+
+    
 if __name__ == '__main__':
     app.run(debug=True, port=5500)
