@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates, relationship
 from sqlalchemy.ext.associationproxy import association_proxy
+import re
 
 db = SQLAlchemy()
 
@@ -15,6 +16,7 @@ class Employee(db.Model, SerializerMixin):
     password = db.Column(db.String, nullable=False)
     department = db.Column(db.String, nullable=False)
     role = db.Column(db.String, nullable=False)
+    
 
     # relationships with review and leave
     reviews = db.relationship('Review', back_populates= 'employee', cascade="all, delete-orphan")
@@ -24,11 +26,44 @@ class Employee(db.Model, SerializerMixin):
     @validates('role')
     def validate_role(self, key, role):
         if role != 'employee' and role != 'admin':
-            raise ValueError("Category must be either Employee or Admin.")
+            raise ValueError("Category must be either employee or admin.")
         return role
 
+     # serialization rules
+    serialize_rules= ('-reviews.employee', '-leaves.employee')
+    
+    # first and last name
+    @validates('first_name')
+    def validate_name(self, key, name):
+        assert len(name) > 2
+        assert name.isalpha(), "first name should only contain alphabetic characters"
+        return name
+    
+    @validates('last_name')
+    def validate_name(self, key, name):
+        assert len(name) > 3
+        assert name.isalpha(), "last name should only contain alphabetic characters"
+        return name
+    
+    # email
+    @validates('email')
+    def validate_email(self, key, email):
+        assert '@' in email
+        assert re.match(r"[^@]+@[^@]+\.[^@]+", email), "Invalid email format"
+        return email
+    
+    # password
+    @validates('password')
+    def validate_password(self, key, password):
+        assert len(password) > 8
+        assert re.search(r"[A-Z]", password), "Password should contain at least one uppercase letter"
+        assert re.search(r"[a-z]", password), "Password should contain at least one lowercase letter"
+        assert re.search(r"[0-9]", password), "Password should contain at least one digit"
+        assert re.search(r"[!@#$%^&*(),.?\":{}|<>]", password), "Password should contain at least one special character"
+        return password
+
     def __repr__(self):
-        return f"<Employee {self.name}, {self.email}>"
+        return f"<User {self.id}, {self.name}, {self.department},{self.role}, {self.email}, {self.password}>"
     
 
 # Review Table
@@ -49,11 +84,12 @@ class Review(db.Model, SerializerMixin):
          if not 5 <= len(description) <= 100:
              raise ValueError("Description must be between 5 and 100 characters.")
          return description
-
-
+    
     def __repr__(self):
          return f"<Review {self.id}, {self.description}>"
 
+
+    
 class Leave(db.Model, SerializerMixin):
     __tablename__ = "leave"
 
