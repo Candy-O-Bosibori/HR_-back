@@ -6,8 +6,6 @@ from sqlalchemy.ext.associationproxy import association_proxy
 db = SQLAlchemy()
 
 # Define Models
-
-
 class Employee(db.Model, SerializerMixin):
     __tablename__= 'employees'
     # columns
@@ -19,13 +17,13 @@ class Employee(db.Model, SerializerMixin):
     role = db.Column(db.String, nullable=False)
 
     # relationships with review and leave
-    review = db.relationship('Review', back_populates= 'employee', cascade="all, delete-orphan")
+    reviews = db.relationship('Review', back_populates= 'employee', cascade="all, delete-orphan")
     leave = db.relationship('Leave', back_populates= 'employee', cascade="all, delete-orphan")
 
     # validation
     @validates('role')
     def validate_role(self, key, role):
-        if role != 'Employee' and role != 'Admin':
+        if role != 'employee' and role != 'admin':
             raise ValueError("Category must be either Employee or Admin.")
         return role
 
@@ -35,28 +33,29 @@ class Employee(db.Model, SerializerMixin):
 
 # Review Table
 class Review(db.Model, SerializerMixin):
- 
-   __tablename__= 'reviews' 
+    __tablename__= 'reviews' 
+   
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String, nullable=False)
+    
+    # Foreign Key
+    employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
+   
+    # Relationship with employee
+    employee = db.relationship('Employee', back_populates='reviews')
 
-   id = db.Column(db.Integer, primary_key=True)
-   description = db.Column(db.String, nullable=False)
-   employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
-
-   employee = db.relationship('Employee', back_populates='reviews')
-
-   @validates('description')
-   def validate_description(self, key, description):
-        if not 5 <= len(description) <= 100:
-            raise ValueError("Description must be between 5 and 100 characters.")
-        return description
+    @validates('description')
+    def validate_description(self, key, description):
+         if not 5 <= len(description) <= 100:
+             raise ValueError("Description must be between 5 and 100 characters.")
+         return description
 
 
-   def __repr__(self):
-        return f"<Review {self.id}, {self.description}>"
-
+    def __repr__(self):
+         return f"<Review {self.id}, {self.description}>"
 
 class Leave(db.Model, SerializerMixin):
-    __tablename__ = "Leave"
+    __tablename__ = "leave"
 
     id = db.Column(db.Integer,primary_key=True)
     leaveType = db.Column(db.String, nullable=False)
@@ -65,7 +64,7 @@ class Leave(db.Model, SerializerMixin):
     status = db.Column(db.String, nullable=False, default='pending')
 
 
-# relationship with employee
+    # relationship with employee
     employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
     employee = db.relationship('Employee', back_populates='leave')
    
@@ -73,15 +72,15 @@ class Leave(db.Model, SerializerMixin):
     #validation
     @validates('status')
     def validate_status(self, key, status):
-        if status != 'accepted' and status != 'rejected':
-            raise ValueError("Category must be either accepted or rejected")
+        if status not in ('accepted', 'rejected', 'pending'):
+            raise ValueError("Status must be either 'accepted', 'rejected', or 'pending'")
         return status
-    
-    @validates('leavetype')
-    def validate_leavetype(self, key, leavetype):
-        if leavetype not in ('sick', 'casual', 'vacation'):
+
+    @validates('leaveType')
+    def validate_leaveType(self, key, leaveType):
+        if leaveType not in ('sick', 'casual', 'vacation'):
             raise ValueError("Invalid Leave Type")
-        return leavetype
+        return leaveType
     
     def __repr__(self):
         return f"<Leave {self.leaveType}, {self.startDate}, {self.endDate}, {self.status}>"

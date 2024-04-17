@@ -10,24 +10,9 @@ if __name__ == '__main__':
 
 
         print("Seeding powers...")
-        powers = [
+        employees = []
 
-            Employee(name="Lindey Stroud", email="lindseystroud@gmail.com", password="lindsey123", department="Technology Department", role="emloyee"),
-            Employee(name="John Doe", email="johndoe@gmail.com", password="johndoe123", department="Communications Department", role="emloyee"),
-            Employee(name="Peter paker", email="peterpaker@gamil.com", password="peterpaker123", department="Research Department", role="emloyee"),
-            
-
-        ]
-
-        print("Seeding reviews...")
-        reviews = [
-            Review(description="Great product!", employee_id=1),
-            Review(description="Could be better.", employee_id=2),
-            Review(description="Excellent service.", employee_id=3),
-            
-        ]
-
-        db.session.add_all(reviews)
+        db.session.add_all(employees)
         db.session.commit()
 
     
