@@ -41,11 +41,20 @@ class Employee(db.Model, SerializerMixin):
     def __repr__(self):
         return f"<Employee {self.name}, {self.email}>"
 
-class Review(db.Model, SerializerMixin):
-    __tablename__ = "reviews"
-
+class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String, nullable=False)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'), nullable=False)
+
+    @validates('description')
+    def validate_description(self, key, description):
+        if not 5 <= len(description) <= 100:
+            raise ValueError("Description must be between 5 and 100 characters.")
+        return description
+
+    def __repr__(self):
+        return f"<Review {self.id}, {self.description}>"
+
 
 class Leave(db.Model, SerializerMixin):
     __tablename__ = "Leave"

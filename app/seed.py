@@ -1,7 +1,7 @@
 from random import choice as rc
 
 from app import app
-from models import db, Employee
+from models import db, Employee , Review
 
 if __name__ == '__main__':
     with app.app_context():
@@ -18,6 +18,19 @@ if __name__ == '__main__':
             
 
         ]
+
+        print("Seeding reviews...")
+        reviews = [
+            Review(description="Great product!", employee_id=1),
+            Review(description="Could be better.", employee_id=2),
+            Review(description="Excellent service.", employee_id=3),
+            
+        ]
+
+        db.session.add_all(reviews)
+        db.session.commit()
+
+    
 
 
 
