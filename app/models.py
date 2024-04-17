@@ -9,7 +9,7 @@ db = SQLAlchemy()
 # Define Models
 class Employee(db.Model, SerializerMixin):
     __tablename__= 'employees'
-    # columns
+    
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
@@ -20,7 +20,7 @@ class Employee(db.Model, SerializerMixin):
 
     # relationships with review and leave
     reviews = db.relationship('Review', back_populates= 'employee', cascade="all, delete-orphan")
-    leave = db.relationship('Leave', back_populates= 'employee', cascade="all, delete-orphan")
+    leaves = db.relationship('Leave', back_populates= 'employee', cascade="all, delete-orphan")
 
     # validation
     @validates('role')
@@ -91,7 +91,7 @@ class Review(db.Model, SerializerMixin):
 
     
 class Leave(db.Model, SerializerMixin):
-    __tablename__ = "leave"
+    __tablename__ = "leaves"
 
     id = db.Column(db.Integer,primary_key=True)
     leaveType = db.Column(db.String, nullable=False)
@@ -102,7 +102,7 @@ class Leave(db.Model, SerializerMixin):
 
     # relationship with employee
     employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
-    employee = db.relationship('Employee', back_populates='leave')
+    employee = db.relationship('Employee', back_populates='leaves')
    
 
     #validation
