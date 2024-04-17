@@ -30,27 +30,24 @@ class Employee(db.Model, SerializerMixin):
             raise ValueError("Category must be either Employee or Admin.")
         return role
 
-
-
-
-
-
-
-
-
     def __repr__(self):
         return f"<Employee {self.name}, {self.email}>"
+    
 
-class Review(db.Model):
+# Review Table
+class Review(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String, nullable=False)
-    employee_id = db.Column(db.Integer, db.ForeignKey('employee.id'), nullable=False)
+    employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
+
+    employee = db.relationship('Employee', back_populates='reviews')
 
     @validates('description')
     def validate_description(self, key, description):
         if not 5 <= len(description) <= 100:
             raise ValueError("Description must be between 5 and 100 characters.")
         return description
+
 
     def __repr__(self):
         return f"<Review {self.id}, {self.description}>"

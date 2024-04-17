@@ -58,47 +58,44 @@ class EmployeeResource(Resource):
         return jsonify({'message': 'Employee deleted successfully'})
     
 
-  # Route for getting all reviews and adding a new review
-@app.route('/reviews', methods=['GET', 'POST'])
-def reviews():
-    if request.method == 'GET':
+class ReviewsResource(Resource):
+    def get(self):
         reviews = Review.query.all()
         return jsonify([{'id': review.id, 'description': review.description, 'employee_id': review.employee_id} for review in reviews])
-    
-    if request.method == 'POST':
+
+    def post(self):
         data = request.json
         if 'description' not in data or 'employee_id' not in data:
-            return jsonify({'error': 'Description and employee_id are required'}), 400
+            return {'error': 'Description and employee_id are required'}, 400
         review = Review(description=data['description'], employee_id=data['employee_id'])
 
         db.session.add(review)
         db.session.commit()
-        return jsonify({'message': 'Review added successfully'}), 201
+        return {'message': 'Review added successfully'}, 201
 
-# Route for getting, updating, or deleting a specific review
-@app.route('/reviews/<int:review_id>', methods=['GET', 'PATCH', 'DELETE'])
-def review(review_id):
-    review = Review.query.get_or_404(review_id)
+class ReviewResource(Resource):
+    def get(self, review_id):
+        review = Review.query.get_or_404(review_id)
+        return {'id': review.id, 'description': review.description, 'employee_id': review.employee_id}
 
-    if request.method == 'GET':
-        return jsonify({'id': review.id, 'description': review.description, 'employee_id': review.employee_id})
-    
-    if request.method == 'PATCH':
+    def patch(self, review_id):
+        review = Review.query.get_or_404(review_id)
         data = request.json
         if 'description' in data:
             review.description = data['description']
         if 'employee_id' in data:
             review.employee_id = data['employee_id']
         db.session.commit()
-        return jsonify({'message': 'Review updated successfully'})
+        return {'message': 'Review updated successfully'}
 
-    if request.method == 'DELETE':
+    def delete(self, review_id):
+        review = Review.query.get_or_404(review_id)
         db.session.delete(review)
         db.session.commit()
-        return jsonify({'message': 'Review deleted successfully'})
+        return {'message': 'Review deleted successfully'}
 
-api.add_resource(EmployeesResource, '/employees')
-api.add_resource(EmployeeResource, '/employee/<int:employee_id>')
+api.add_resource(ReviewsResource, '/reviews')
+api.add_resource(ReviewResource, '/reviews/<int:review_id>')
 
 if __name__ == '__main__':
     app.run(debug=True)
