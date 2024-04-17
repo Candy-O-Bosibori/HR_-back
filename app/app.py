@@ -97,5 +97,6 @@ class ReviewResource(Resource):
 api.add_resource(ReviewsResource, '/reviews')
 api.add_resource(ReviewResource, '/reviews/<int:review_id>')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+         if __name__ == '__main__':
+          app.run(debug=True)
