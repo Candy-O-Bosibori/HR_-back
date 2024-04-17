@@ -56,3 +56,33 @@ class Review(db.Model):
         return f"<Review {self.id}, {self.description}>"
 
 
+class Leave(db.Model, SerializerMixin):
+    __tablename__ = "Leave"
+
+    id = db.Column(db.Integer,primary_key=True)
+    leaveType = db.Column(db.String, nullable=False)
+    startDate = db.Column(db.DateTime, nullable=False)
+    endDate = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String, nullable=False, default='pending')
+
+
+# relationship with employee
+    employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
+    employee = db.relationship('Employee', back_populates='leave')
+   
+
+    #validation
+    @validates('status')
+    def validate_status(self, key, status):
+        if status != 'accepted' and status != 'rejected':
+            raise ValueError("Category must be either accepted or rejected")
+        return status
+    
+    @validates('leavetype')
+    def validate_leavetype(self, key, leavetype):
+        if leavetype not in ('sick', 'casual', 'vacation'):
+            raise ValueError("Invalid Leave Type")
+        return leavetype
+    
+    def __repr__(self):
+        return f"<Leave {self.leaveType}, {self.startDate}, {self.endDate}, {self.status}>"

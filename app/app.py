@@ -58,6 +58,22 @@ class EmployeeResource(Resource):
         return jsonify({'message': 'Employee deleted successfully'})
     
 
+
+
+
+    #leave routing
+@app.routes('/leave', methods=['GET', 'POST'])
+def leaves():
+        if request.method == "GET":
+
+
+
+
+
+
+
+
+
   # Route for getting all reviews and adding a new review
 @app.route('/reviews', methods=['GET', 'POST'])
 def reviews():
@@ -100,5 +116,6 @@ def review(review_id):
 api.add_resource(EmployeesResource, '/employees')
 api.add_resource(EmployeeResource, '/employee/<int:employee_id>')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+         if __name__ == '__main__':
+          app.run(debug=True)
