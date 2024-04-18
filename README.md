@@ -77,4 +77,4 @@ Before proceeding with the installation, make sure you have the following prereq
 - **DELETE /leave/{leave_id}**: Delete a leave by ID.
 
 ##### Leave Approval
-- **PATCH /leave-approval/{leave_id}**: Approve or reject a leave (admin only).
+- **PATCH /leave-approval/{leave_id}**: Approve or reject a leave (admin only)..
