@@ -1,4 +1,5 @@
 from flask import Flask, request, make_response, jsonify
+#rom .extensions import api
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from flask_cors import CORS
@@ -10,6 +11,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
+#api.init_app(app)
 migrate = Migrate(app, db)
 db.init_app(app)
 api = Api(app)

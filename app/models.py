@@ -26,7 +26,7 @@ class Employee(db.Model, SerializerMixin):
     @validates('role')
     def validate_role(self, key, role):
         if role != 'employee' and role != 'admin':
-            raise ValueError("Category must be either employee or admin.")
+            raise ValueError("Role must be either employee or admin.")
         return role
 
      # serialization rules
