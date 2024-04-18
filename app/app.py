@@ -1,7 +1,7 @@
 from flask import Flask, request, make_response, jsonify
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -36,13 +36,25 @@ class SignIn(Resource):
         
         employee = Employee.query.filter_by(email=email).first()
         
-        if not employee or not bcrypt.check_password_hash(employee.password, password):
-            return {"error": "Bad username or password"}, 401
+        if not employee:
+            return {"error": "User does not exist"}, 401
+        if not bcrypt.check_password_hash(employee.password, password):
+            return {"error": "Incorrect password"}, 401
         
         access_token = create_access_token(identity={'id': employee.id, 'role': employee.role})
-        return {"access_token": access_token}, 200
+        refresh_token = create_refresh_token(identity={'id': employee.id, 'role': employee.role})
+        return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
 api.add_resource(SignIn, '/signin')
+
+class TokenRefresh(Resource):
+    @jwt_required('refresh')
+    def post(self):
+        current_user = get_jwt_identity()
+        access_token = create_access_token(identity=current_user)
+        return {'access_token': access_token}, 200
+
+api.add_resource(TokenRefresh, '/refresh-token')
         
 class Employees(Resource):
     @jwt_required()
@@ -69,7 +81,8 @@ class Employees(Resource):
             email=data['email'],
             role=data['role'],
             password=hashed_password,
-            department=data['department']
+            department=data['department'],
+            image=data['image']
             )
         
         db.session.add(employee)
@@ -100,7 +113,7 @@ class EmployeeByID(Resource):
             try:   
                 employee.name = data['name']
                 employee.email = data['email']
-                employee.password = data['password']
+                employee.password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
                 db.session.commit()
                 return make_response(employee.to_dict(), 200)
 
@@ -179,7 +192,7 @@ class Leave(Resource):
     @jwt_required()
     def get(self):
         leaves = Leave.query.all()
-        return jsonify([{'id':Leave.id, 'leavetype':Leave.leavetype, 'startdate':Leave.startdate, 'enddate':Leave.endDate, 'status':Leave.status }])
+        return {'leaves': [leave.to_dict() for leave in leaves]}
     
     @jwt_required()
     def post(self):
@@ -190,40 +203,56 @@ class Leave(Resource):
         new_leave = Leave(
             leavetype=data['leavetype'],
             startdate=data['startdate'],
-            enddate=data['enddate']
+            enddate=data['enddate'],
+            employee_id=get_jwt_identity()['id'],
+            status='pending'  # set status to 'pending'
         )
         db.session.add(new_leave)
         db.session.commit()
         
         return jsonify({'message': 'Leave added successfully!', 'id': new_leave.id}), 201
     
-    # getting an error in the Leave
-    #api.add_resource(Leave, '/leave')
+api.add_resource(Leave, '/leave')
     
 class LeaveById(Resource):
     @jwt_required()
     def get(self, leave_id):
         leave = Leave.query.get_or_404(leave_id)
-        return {'id': leave.id, 'startdata': leave.startdate, 'enddate': leave.enddate, 'status': leave.leave.status}
+        return {'id': leave.id, 'startdate': leave.startDate, 'enddate': leave.endDate, 'status': leave.status}
 
     @jwt_required()
-    def post(self, leave_id):
+    def patch(self, leave_id):
         leave = Leave.query.get_or_404(leave_id)
         data = request.json
         if 'leavetype' not in data or 'startdate' not in data or 'enddate' not in data:
             return jsonify({'error': 'Leave type, start date, end date are required'}), 400
-
-        new_leave = Leave(
-            leavetype=data['leavetype'],
-            startdate=data['startdate'],
-            enddate=data['enddate']
-        )
-        db.session.add(new_leave)
+    
+        leave.leavetype = data['leavetype']
+        leave.startdate = data['startdate']
+        leave.enddate = data['enddate']
         db.session.commit()
-
-        return jsonify({'message': 'Leave added successfully!', 'id': new_leave.id}), 201
+    
+        return jsonify({'message': 'Leave updated successfully!', 'id': leave.id}), 200
 
 api.add_resource(LeaveById, '/leave/<int:leave_id>')
+
+class LeaveApproval(Resource):
+    @jwt_required()
+    def patch(self, leave_id):
+        claims = get_jwt_identity()
+        if claims['role'] != 'admin':
+            return {'error': 'Only admins can approve leaves'}, 403
+    
+        leave = Leave.query.get_or_404(leave_id)
+        data = request.json
+        if 'status' not in data or data['status'] not in ['accepted', 'rejected']:
+            return {'error': 'Status is required and must be either "approved" or "rejected"'}, 400
+    
+        leave.status = data['status']
+        db.session.commit()
+        return {'message': 'Leave status updated successfully'}
+
+api.add_resource(LeaveApproval, '/leave-approval/<int:leave_id>')
 
     
 if __name__ == '__main__':

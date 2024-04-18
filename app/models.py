@@ -32,20 +32,7 @@ class Employee(db.Model, SerializerMixin):
 
      # serialization rules
     serialize_rules= ('-reviews.employee', '-leaves.employee')
-    
-    # first and last name
-    @validates('first_name')
-    def validate_name(self, key, name):
-        assert len(name) > 2
-        assert name.isalpha(), "first name should only contain alphabetic characters"
-        return name
-    
-    @validates('last_name')
-    def validate_name(self, key, name):
-        assert len(name) > 3
-        assert name.isalpha(), "last name should only contain alphabetic characters"
-        return name
-    
+       
     # email
     @validates('email')
     def validate_email(self, key, email):
