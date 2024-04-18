@@ -9,18 +9,19 @@ db = SQLAlchemy()
 # Define Models
 class Employee(db.Model, SerializerMixin):
     __tablename__= 'employees'
-    # columns
+    
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
     department = db.Column(db.String, nullable=False)
     role = db.Column(db.String, nullable=False)
+    image = db.Column(db.String, nullable=True)
     
 
     # relationships with review and leave
     reviews = db.relationship('Review', back_populates= 'employee', cascade="all, delete-orphan")
-    leave = db.relationship('Leave', back_populates= 'employee', cascade="all, delete-orphan")
+    leaves = db.relationship('Leave', back_populates= 'employee', cascade="all, delete-orphan")
 
     # validation
     @validates('role')
@@ -31,20 +32,7 @@ class Employee(db.Model, SerializerMixin):
 
      # serialization rules
     serialize_rules= ('-reviews.employee', '-leaves.employee')
-    
-    # first and last name
-    @validates('first_name')
-    def validate_name(self, key, name):
-        assert len(name) > 2
-        assert name.isalpha(), "first name should only contain alphabetic characters"
-        return name
-    
-    @validates('last_name')
-    def validate_name(self, key, name):
-        assert len(name) > 3
-        assert name.isalpha(), "last name should only contain alphabetic characters"
-        return name
-    
+       
     # email
     @validates('email')
     def validate_email(self, key, email):
@@ -91,7 +79,7 @@ class Review(db.Model, SerializerMixin):
 
     
 class Leave(db.Model, SerializerMixin):
-    __tablename__ = "leave"
+    __tablename__ = "leaves"
 
     id = db.Column(db.Integer,primary_key=True)
     leaveType = db.Column(db.String, nullable=False)
@@ -102,7 +90,7 @@ class Leave(db.Model, SerializerMixin):
 
     # relationship with employee
     employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
-    employee = db.relationship('Employee', back_populates='leave')
+    employee = db.relationship('Employee', back_populates='leaves')
    
 
     #validation

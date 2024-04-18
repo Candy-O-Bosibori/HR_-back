@@ -2,36 +2,88 @@ from flask import Flask, request, make_response, jsonify
 #rom .extensions import api
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
 
-from models import db, Employee, Review
+from models import db, Employee, Review, Leave
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
+load_dotenv()
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 
-#api.init_app(app)
+
 migrate = Migrate(app, db)
 db.init_app(app)
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
 api = Api(app)
 CORS(app)
 
 # Restful Routes
+class SignIn(Resource):
+    def post(self):
+        data = request.get_json()
+        if not data:
+            return {"error": "Missing data in request"}, 400
+
+        email = data.get('email')
+        password = data.get('password')
+        
+        employee = Employee.query.filter_by(email=email).first()
+        
+        if not employee:
+            return {"error": "User does not exist"}, 401
+        if not bcrypt.check_password_hash(employee.password, password):
+            return {"error": "Incorrect password"}, 401
+        
+        access_token = create_access_token(identity={'id': employee.id, 'role': employee.role})
+        refresh_token = create_refresh_token(identity={'id': employee.id, 'role': employee.role})
+        return {"access_token": access_token, "refresh_token": refresh_token}, 200
+
+api.add_resource(SignIn, '/signin')
+
+class TokenRefresh(Resource):
+    @jwt_required('refresh')
+    def post(self):
+        current_user = get_jwt_identity()
+        access_token = create_access_token(identity=current_user)
+        return {'access_token': access_token}, 200
+
+api.add_resource(TokenRefresh, '/refresh-token')
+        
 class Employees(Resource):
+    @jwt_required()
     def get(self):
+        claims = get_jwt_identity()
+        employee_id = claims['id']
+        employee_role = claims['role']
         employees = [employee.to_dict() for employee in Employee.query.all()]
         return make_response(employees, 200)
     
-
+    @jwt_required()
     def post(self):
+        claims = get_jwt_identity()
+        if claims['role'] != 'admin':
+            return {"error": "Only admins can create new employees"}, 403
+        
         data = request.get_json()
+        if not data:
+            return {"error": "Missing data in request"}, 400
+        
+        hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
         employee = Employee(
             name=data['name'], 
             email=data['email'],
             role=data['role'],
-            password=data['password'],
-            department=data['department']
+            password=hashed_password,
+            department=data['department'],
+            image=data['image']
             )
         
         db.session.add(employee)
@@ -41,16 +93,16 @@ class Employees(Resource):
 api.add_resource(Employees, '/employees')
 
 class EmployeeByID(Resource):
+    @jwt_required()
     def get(self, id):
         employee = Employee.query.filter_by(id=id).first()
         if employee is None:
-            return {"error": "Hero not found"}, 404
+            return {"error": "Employee not found"}, 404
         response_dict = employee.to_dict()
         return make_response(response_dict, 200)
     
-    # edit an employee
+    @jwt_required()
     def patch(self, id):
-        # check if id excist in data base 
         employee = Employee.query.filter_by(id=id).first()
         if employee is None:
             return {"error": "Employee not found"}, 404
@@ -62,7 +114,7 @@ class EmployeeByID(Resource):
             try:   
                 employee.name = data['name']
                 employee.email = data['email']
-                employee.password = data['password']
+                employee.password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
                 db.session.commit()
                 return make_response(employee.to_dict(), 200)
 
@@ -71,20 +123,27 @@ class EmployeeByID(Resource):
         else:
             return {"errors": ["validation errors"]}, 400
 
+    @jwt_required()
     def delete(self, employee_id):
         employee = Employee.query.get_or_404(employee_id)
         db.session.delete(employee)
         db.session.commit()
         return jsonify({'message': 'Employee deleted successfully'})
  
-api.add_resource(EmployeeByID, '/employees/<int:employee_id>')  
+api.add_resource(EmployeeByID, '/employee/<int:employee_id>')  
 
 class Reviews(Resource):
-    def get(self):
+    @jwt_required()
+    def get(self):        
         reviews = Review.query.all()
         return jsonify([{'id': review.id, 'description': review.description, 'employee_id': review.employee_id} for review in reviews])
 
+    @jwt_required()
     def post(self):
+        claims = get_jwt_identity()
+        if claims['role'] != 'admin':
+            return {'error': 'Only admins can add reviews'}, 403
+        
         data = request.json
         if 'description' not in data or 'employee_id' not in data:
             return {'error': 'Description and employee_id are required'}, 400
@@ -97,11 +156,17 @@ class Reviews(Resource):
 api.add_resource(Reviews, '/reviews')
 
 class ReviewByID(Resource):
+    @jwt_required()
     def get(self, review_id):
         review = Review.query.get_or_404(review_id)
         return {'id': review.id, 'description': review.description, 'employee_id': review.employee_id}
 
+    @jwt_required()
     def patch(self, review_id):
+        claims = get_jwt_identity()
+        if claims['role'] != 'admin':
+            return {'error': 'Only admins can add reviews'}, 403
+        
         review = Review.query.get_or_404(review_id)
         data = request.json
         if 'description' in data:
@@ -110,8 +175,13 @@ class ReviewByID(Resource):
             review.employee_id = data['employee_id']
         db.session.commit()
         return {'message': 'Review updated successfully'}
-
+    
+    @jwt_required()
     def delete(self, review_id):
+        claims = get_jwt_identity()
+        if claims['role'] != 'admin':
+            return {'error': 'Only admins can add reviews'}, 403
+        
         review = Review.query.get_or_404(review_id)
         db.session.delete(review)
         db.session.commit()
@@ -119,14 +189,13 @@ class ReviewByID(Resource):
 
 api.add_resource(ReviewByID, '/reviews/<int:review_id>')
 
-
-#leave 
 class Leave(Resource):
+    @jwt_required()
     def get(self):
         leaves = Leave.query.all()
-        return jsonify([{'id':Leave.id, 'leavetype':Leave.leavetype, 'startdate':Leave.startdate, 'enddate':Leave.endDate, 'status':Leave.status }])
+        return {'leaves': [leave.to_dict() for leave in leaves]}
     
-    
+    @jwt_required()
     def post(self):
         data = request.json
         if 'leavetype' not in data or 'startdate' not in data or 'enddate' not in data:
@@ -135,38 +204,56 @@ class Leave(Resource):
         new_leave = Leave(
             leavetype=data['leavetype'],
             startdate=data['startdate'],
-            enddate=data['enddate']
+            enddate=data['enddate'],
+            employee_id=get_jwt_identity()['id'],
+            status='pending'  # set status to 'pending'
         )
         db.session.add(new_leave)
         db.session.commit()
         
         return jsonify({'message': 'Leave added successfully!', 'id': new_leave.id}), 201
     
-    # getting an error in the Leave
-    #api.add_resource(Leave, '/leave')
+api.add_resource(Leave, '/leave')
     
 class LeaveById(Resource):
+    @jwt_required()
     def get(self, leave_id):
         leave = Leave.query.get_or_404(leave_id)
-        return {'id': leave.id, 'startdata': leave.startdate, 'enddate': leave.enddate, 'status': leave.leave.status}
+        return {'id': leave.id, 'startdate': leave.startDate, 'enddate': leave.endDate, 'status': leave.status}
 
-    def post(self, leave_id):
+    @jwt_required()
+    def patch(self, leave_id):
         leave = Leave.query.get_or_404(leave_id)
         data = request.json
         if 'leavetype' not in data or 'startdate' not in data or 'enddate' not in data:
             return jsonify({'error': 'Leave type, start date, end date are required'}), 400
-
-        new_leave = Leave(
-            leavetype=data['leavetype'],
-            startdate=data['startdate'],
-            enddate=data['enddate']
-        )
-        db.session.add(new_leave)
+    
+        leave.leavetype = data['leavetype']
+        leave.startdate = data['startdate']
+        leave.enddate = data['enddate']
         db.session.commit()
-
-        return jsonify({'message': 'Leave added successfully!', 'id': new_leave.id}), 201
+    
+        return jsonify({'message': 'Leave updated successfully!', 'id': leave.id}), 200
 
 api.add_resource(LeaveById, '/leave/<int:leave_id>')
+
+class LeaveApproval(Resource):
+    @jwt_required()
+    def patch(self, leave_id):
+        claims = get_jwt_identity()
+        if claims['role'] != 'admin':
+            return {'error': 'Only admins can approve leaves'}, 403
+    
+        leave = Leave.query.get_or_404(leave_id)
+        data = request.json
+        if 'status' not in data or data['status'] not in ['accepted', 'rejected']:
+            return {'error': 'Status is required and must be either "approved" or "rejected"'}, 400
+    
+        leave.status = data['status']
+        db.session.commit()
+        return {'message': 'Leave status updated successfully'}
+
+api.add_resource(LeaveApproval, '/leave-approval/<int:leave_id>')
 
     
 if __name__ == '__main__':
