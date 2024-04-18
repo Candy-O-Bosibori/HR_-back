@@ -103,34 +103,48 @@ class EmployeeByID(Resource):
     
     @jwt_required()
     def patch(self, id):
+        claims = get_jwt_identity()
         employee = Employee.query.filter_by(id=id).first()
         if employee is None:
             return {"error": "Employee not found"}, 404
-        
-        # if it does then retrieve the updated part
-        data = request.get_json()
 
-        if all(key in data for key in ['name', 'email', 'password']):
-            try:   
-                employee.name = data['name']
-                employee.email = data['email']
-                employee.password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+        data = request.get_json()
+        if claims['role'] == 'admin':
+            if all(key in data for key in ['name', 'email', 'password']):
+                try:   
+                    employee.name = data['name']
+                    employee.email = data['email']
+                    employee.password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+                    db.session.commit()
+                    return make_response(employee.to_dict(), 200)
+
+                except AssertionError:
+                    return {"errors": ["validation errors"]}, 400
+            else:
+                return {"errors": ["validation errors"]}, 400
+        elif claims['role'] == 'employee' and any(key in data for key in ['password', 'name', 'image']):
+            try:
+                if 'password' in data:
+                    employee.password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+                if 'name' in data:
+                    employee.name = data['name']
+                if 'image' in data:
+                    employee.image = data['image']
                 db.session.commit()
                 return make_response(employee.to_dict(), 200)
-
             except AssertionError:
                 return {"errors": ["validation errors"]}, 400
         else:
-            return {"errors": ["validation errors"]}, 400
+            return {"error": "Unauthorized"}, 403
 
     @jwt_required()
-    def delete(self, employee_id):
-        employee = Employee.query.get_or_404(employee_id)
+    def delete(self, id):
+        employee = Employee.query.get_or_404(id)
         db.session.delete(employee)
         db.session.commit()
         return jsonify({'message': 'Employee deleted successfully'})
  
-api.add_resource(EmployeeByID, '/employee/<int:employee_id>')  
+api.add_resource(EmployeeByID, '/employee/<int:id>')  
 
 class Reviews(Resource):
     @jwt_required()
