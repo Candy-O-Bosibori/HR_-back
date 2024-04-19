@@ -85,20 +85,12 @@ class Leave(db.Model, SerializerMixin):
     leaveType = db.Column(db.String, nullable=False)
     startDate = db.Column(db.DateTime, nullable=False)
     endDate = db.Column(db.DateTime, nullable=False)
-    status = db.Column(db.String, nullable=False, default='pending')
 
 
     # relationship with employee
     employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
     employee = db.relationship('Employee', back_populates='leaves')
    
-
-    #validation
-    @validates('status')
-    def validate_status(self, key, status):
-        if status not in ('accepted', 'rejected', 'pending'):
-            raise ValueError("Status must be either 'accepted', 'rejected', or 'pending'")
-        return status
 
     @validates('leaveType')
     def validate_leaveType(self, key, leaveType):
