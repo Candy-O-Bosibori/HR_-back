@@ -10,7 +10,8 @@ import os
 from models import db, Employee, Review, Leave
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 load_dotenv()
@@ -22,7 +23,8 @@ db.init_app(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 api = Api(app)
-CORS(app, origins=["https://alex-m-kimeu.github.io", "http://localhost:5173", "http://127.0.0.1:5500"])
+# CORS(app, origins=["https://alex-m-kimeu.github.io", "http://localhost:5173", "http://127.0.0.1:5500"])
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Restful Routes
 class SignIn(Resource):
@@ -137,8 +139,7 @@ class EmployeeByID(Resource):
             return {"error": "Unauthorized"}, 403
 
     @jwt_required()
-    def delete(self, id):
-        claims = get_jwt_identity()
+    def delete(self, id):        
         employee = Employee.query.filter_by(id=id).first()
         if employee is None:
             return {"error": "Employee not found"}, 404
