@@ -4,13 +4,13 @@ from flask_restful import Api, Resource
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+from datetime import datetime
 from dotenv import load_dotenv
 import os
 
 from models import db, Employee, Review, Leave
 
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
@@ -23,7 +23,6 @@ db.init_app(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 api = Api(app)
-# CORS(app, origins=["https://alex-m-kimeu.github.io", "http://localhost:5173", "http://127.0.0.1:5500"])
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Restful Routes
@@ -179,9 +178,12 @@ api.add_resource(Reviews, '/reviews')
 
 class ReviewByID(Resource):
     @jwt_required()
-    def get(self, review_id):
-        review = Review.query.get_or_404(review_id)
-        return {'id': review.id, 'description': review.description, 'employee_id': review.employee_id}
+    def get(self, id):
+        review = Review.query.filter_by(id=id).first()
+        if review is None:
+            return {"error": "Review not found"}, 404
+        response_dict = review.to_dict()
+        return make_response(response_dict, 200)
 
     @jwt_required()
     def patch(self, review_id):
@@ -211,33 +213,37 @@ class ReviewByID(Resource):
 
 api.add_resource(ReviewByID, '/reviews/<int:review_id>')
 
-class Leave(Resource):
+class LeaveResource(Resource):
     @jwt_required()
     def get(self):
-        leaves = Leave.query.all()
-        return {'leaves': [leave.to_dict() for leave in leaves]}
-    # def get(self):      
-    #     leaves = Leave.query.all()
-    #     return jsonify([{'id': leave.id, 'leaveType': leave.leaveType, 'startDate': leave.startDate, 'endDate': leave.endDate, 'employee_id': leave.employee_id}  for leave in leaves])
+        leaves = [leave.to_dict() for leave in Leave.query.all()]
+        return make_response(leaves, 200)
     
     @jwt_required()
     def post(self):        
         data = request.get_json()
         if not data:
             return {"error": "Missing data in request"}, 400
-        
-        new_leave = Leave(
-            leaveType=data['leaveType'],
-            startDate=data['startDate'],
-            endDate=data['endDate'],
-            employee_id=get_jwt_identity()['id'],
+
+        if 'leaveType' not in data or 'startDate' not in data or 'endDate' not in data:
+            return {"error": "Missing necessary fields in request"}, 400
+
+        try:
+            new_leave = Leave(
+                leaveType=data['leaveType'],
+                startDate=datetime.strptime(data['startDate'], '%Y-%m-%d').date(),
+                endDate=datetime.strptime(data['endDate'], '%Y-%m-%d').date(),
+                employee_id=get_jwt_identity()['id'],
             )
-        
-        db.session.add(new_leave)
-        db.session.commit()
+
+            db.session.add(new_leave)
+            db.session.commit()
+        except Exception as e:
+            return {"error": str(e)}, 500
+
         return make_response(new_leave.to_dict(), 201)
     
-api.add_resource(Leave, '/leave')
+api.add_resource(LeaveResource, '/leaves')
     
 class LeaveById(Resource):
     @jwt_required()
@@ -248,40 +254,25 @@ class LeaveById(Resource):
         response_dict = leave.to_dict()
         return make_response(response_dict, 200)
 
-    # @jwt_required()
-    # def patch(self, id):
-    #     leave = Leave.query.get_or_404(id)
-    #     data = request.json
-    #     if 'leavetype' not in data or 'startdate' not in data or 'enddate' not in data:
-    #         return jsonify({'error': 'Leave type, start date, end date are required'}), 400
-    
-    #     leave.leavetype = data['leavetype']
-    #     leave.startdate = data['startdate']
-    #     leave.enddate = data['enddate']
-    #     db.session.commit()
-    
-    #     return jsonify({'message': 'Leave updated successfully!', 'id': leave.id}), 200
-
-api.add_resource(LeaveById, '/leave/<int:id>')
-
-class LeaveApproval(Resource):
     @jwt_required()
     def patch(self, id):
         claims = get_jwt_identity()
         if claims['role'] != 'admin':
-            return {'error': 'Only admins can approve leaves'}, 403
-    
+            return {'error': 'Only admins approve leaves'}, 403
+
         leave = Leave.query.get_or_404(id)
         data = request.json
-        if 'status' not in data or data['status'] not in ['accepted', 'rejected']:
-            return {'error': 'Status is required and must be either "approved" or "rejected"'}, 400
-    
-        leave.status = data['status']
+        new_status = data['status']
+
+        if new_status not in ['accepted', 'rejected']:
+            return {'error': 'Invalid status value'}, 400
+
+        leave.status = new_status
         db.session.commit()
-        return {'message': 'Leave status updated successfully'}
 
-api.add_resource(LeaveApproval, '/leave-approval/<int:id>')
+        return {'message': 'status updated successfully!', 'id': leave.id}, 200
 
+api.add_resource(LeaveById, '/leave/<int:id>')
     
 if __name__ == '__main__':
     app.run(debug=True, port=5500)
