@@ -186,12 +186,12 @@ class ReviewByID(Resource):
         return make_response(response_dict, 200)
 
     @jwt_required()
-    def patch(self, review_id):
+    def patch(self, id):
         claims = get_jwt_identity()
         if claims['role'] != 'admin':
             return {'error': 'Only admins can add reviews'}, 403
         
-        review = Review.query.get_or_404(review_id)
+        review = Review.query.get_or_404(id)
         data = request.json
         if 'description' in data:
             review.description = data['description']
@@ -201,17 +201,17 @@ class ReviewByID(Resource):
         return {'message': 'Review updated successfully'}
     
     @jwt_required()
-    def delete(self, review_id):
+    def delete(self, id):
         claims = get_jwt_identity()
         if claims['role'] != 'admin':
             return {'error': 'Only admins can add reviews'}, 403
         
-        review = Review.query.get_or_404(review_id)
+        review = Review.query.get_or_404(id)
         db.session.delete(review)
         db.session.commit()
         return {'message': 'Review deleted successfully'}
 
-api.add_resource(ReviewByID, '/reviews/<int:review_id>')
+api.add_resource(ReviewByID, '/review/<int:id>')
 
 class LeaveResource(Resource):
     @jwt_required()
