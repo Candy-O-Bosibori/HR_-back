@@ -52,9 +52,12 @@ api.add_resource(SignIn, '/signin')
 class TokenRefresh(Resource):
     @jwt_required(refresh=True)
     def post(self):
-        current_user = get_jwt_identity()
-        access_token = create_access_token(identity=current_user)
-        return {'access_token': access_token}, 200
+        try:
+            current_user = get_jwt_identity()
+            access_token = create_access_token(identity=current_user)
+            return {'access_token': access_token}, 200
+        except Exception as e:
+            return jsonify(error=str(e)), 500
 
 api.add_resource(TokenRefresh, '/refresh-token')
         
