@@ -1,8 +1,8 @@
-"""Initial Migration
+"""Initial migration
 
-Revision ID: 650804edf79f
+Revision ID: 4efe0edfeef7
 Revises: 
-Create Date: 2024-04-19 08:28:28.085295
+Create Date: 2024-04-20 15:15:55.025898
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '650804edf79f'
+revision = '4efe0edfeef7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -32,8 +32,9 @@ def upgrade():
     op.create_table('leaves',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('leaveType', sa.String(), nullable=False),
-    sa.Column('startDate', sa.DateTime(), nullable=False),
-    sa.Column('endDate', sa.DateTime(), nullable=False),
+    sa.Column('startDate', sa.Date(), nullable=False),
+    sa.Column('endDate', sa.Date(), nullable=False),
+    sa.Column('status', sa.String(), nullable=False),
     sa.Column('employee_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['employee_id'], ['employees.id'], ),
     sa.PrimaryKeyConstraint('id')

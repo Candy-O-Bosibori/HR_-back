@@ -75,17 +75,15 @@ class Review(db.Model, SerializerMixin):
     
     def __repr__(self):
          return f"<Review {self.id}, {self.description}>"
-
-
     
 class Leave(db.Model, SerializerMixin):
     __tablename__ = "leaves"
 
     id = db.Column(db.Integer,primary_key=True)
     leaveType = db.Column(db.String, nullable=False)
-    startDate = db.Column(db.DateTime, nullable=False)
-    endDate = db.Column(db.DateTime, nullable=False)
-
+    startDate = db.Column(db.Date, nullable=False)
+    endDate = db.Column(db.Date, nullable=False)
+    status = db.Column(db.String, nullable=False, default='pending')
 
     # relationship with employee
     employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=False)
