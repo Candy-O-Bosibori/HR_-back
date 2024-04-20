@@ -5,26 +5,17 @@ from sqlalchemy import text
 
 bcrypt = Bcrypt(app)
 
-def reset_sequence(seq_name):
-    """Reset a sequence."""
-    sql = text(f"ALTER SEQUENCE {seq_name} RESTART WITH 1")
-    with db.engine.connect() as connection:
-        connection.execute(sql)
+def execute_sql(sql):
+    """Execute raw SQL."""
+    with db.engine.begin() as connection:
+        connection.execute(text(sql))
+
 
 if __name__ == '__main__':
     with app.app_context():
         print("Clearing db...")
-        Leave.query.delete()
-        Review.query.delete()
-        Employee.query.delete()
-
-        # Reset primary key sequence for each table
-        reset_sequence('leaves_id_seq')
-        reset_sequence('reviews_id_seq')
-        reset_sequence('employees_id_seq')
+        execute_sql("TRUNCATE TABLE leaves, reviews, employees RESTART IDENTITY CASCADE")
         
-        db.session.commit()
-
         print("Seeding employees...")
         employees = [
             Employee(name="Alex Mambo", email="alex@gmail.com", password=bcrypt.generate_password_hash("Alexmambo.123").decode('utf-8'), department='Administrative', role='admin', image='https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600'),
