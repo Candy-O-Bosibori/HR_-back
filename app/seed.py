@@ -22,6 +22,8 @@ if __name__ == '__main__':
         reset_sequence('leaves_id_seq')
         reset_sequence('reviews_id_seq')
         reset_sequence('employees_id_seq')
+        
+        db.session.commit()
 
         print("Seeding employees...")
         employees = [
