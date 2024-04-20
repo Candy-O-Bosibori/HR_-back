@@ -1,8 +1,15 @@
 from flask_bcrypt import Bcrypt
 from app import app
 from models import db, Employee, Review, Leave
+from sqlalchemy import text
 
 bcrypt = Bcrypt(app)
+
+def reset_sequence(seq_name):
+    """Reset a sequence."""
+    sql = text(f"ALTER SEQUENCE {seq_name} RESTART WITH 1")
+    with db.engine.connect() as connection:
+        connection.execute(sql)
 
 if __name__ == '__main__':
     with app.app_context():
@@ -10,6 +17,11 @@ if __name__ == '__main__':
         Leave.query.delete()
         Review.query.delete()
         Employee.query.delete()
+
+        # Reset primary key sequence for each table
+        reset_sequence('leaves_id_seq')
+        reset_sequence('reviews_id_seq')
+        reset_sequence('employees_id_seq')
 
         print("Seeding employees...")
         employees = [
