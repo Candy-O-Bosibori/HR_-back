@@ -213,6 +213,16 @@ class ReviewByID(Resource):
 
 api.add_resource(ReviewByID, '/review/<int:id>')
 
+class ReviewsByEmployeeID(Resource):
+    @jwt_required()
+    def get(self, employee_id):
+        reviews = Review.query.filter_by(employee_id=employee_id).all()
+        if not reviews:
+            return {"error": "No reviews found for this employee"}, 404
+        return jsonify([{'id': review.id, 'description': review.description, 'employee_id': review.employee_id} for review in reviews])
+
+api.add_resource(ReviewsByEmployeeID, '/reviews/employee/<int:employee_id>')
+
 class LeaveResource(Resource):
     @jwt_required()
     def get(self):
