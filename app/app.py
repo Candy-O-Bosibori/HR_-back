@@ -283,6 +283,18 @@ class LeaveById(Resource):
         return {'message': 'status updated successfully!', 'id': leave.id}, 200
 
 api.add_resource(LeaveById, '/leave/<int:id>')
+
+class LeaveByEmployeeID(Resource):
+    @jwt_required()
+    def get(self):
+        claims = get_jwt_identity()
+        employee_id = claims['id']
+        leaves = Leave.query.filter_by(employee_id=employee_id).all()
+        if not leaves:
+            return {"error": "No leave applications found for this employee"}, 404
+        return jsonify([leave.to_dict() for leave in leaves])
+
+api.add_resource(LeaveByEmployeeID, '/leaves/employee')
     
 if __name__ == '__main__':
     app.run(debug=True, port=5500)
