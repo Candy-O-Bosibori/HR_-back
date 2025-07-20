@@ -33,3 +33,6 @@ SQLAlchemy-serializer==1.4.12
 typing_extensions==4.11.0
 Werkzeug==3.0.2
 zipp==3.18.1
+Flask>=2.2.0
+SQLAlchemy>=1.4
+greenlet==2.0.2
