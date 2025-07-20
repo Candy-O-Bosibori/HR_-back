@@ -1,6 +1,7 @@
-.venv/
+.venv-py311/
 .env
 venv
+venv-py311
 
 *.pyc
 __pycache__/
