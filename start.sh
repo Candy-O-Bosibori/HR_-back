@@ -7,4 +7,4 @@ export FLASK_APP=app.py
 export FLASK_ENV=development  # Optional: enables debug mode
 
 # Run the Flask app on all interfaces so it's accessible externally, port 5000
-cd app && flask run 
+flask run 
