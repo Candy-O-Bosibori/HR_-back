@@ -2,6 +2,8 @@ from flask_bcrypt import Bcrypt
 from app import app
 from models import db, Employee, Review, Leave
 from sqlalchemy import text
+import random
+from datetime import date, timedelta
 
 bcrypt = Bcrypt(app)
 
@@ -22,7 +24,7 @@ if __name__ == '__main__':
         print("Seeding employees...")
         # employees = [
         #     Employee(name="Alex Mambo", email="alex@gmail.com", password=bcrypt.generate_password_hash("Alex123!").decode('utf-8'), department='Administrative', role='admin', image='https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600'),
-        #     Employee(name="Hamdi Adan", email="hamdi@gmail.com", password=bcrypt.generate_password_hash("Hamdi123!").decode('utf-8'), department='HR', role='admin', image='https://images.pexels.com/photos/764529/pexels-photo-764529.jpeg?auto=compress&cs=tinysrgb&w=600'),
+        #     Employee(name="Hamdi Adan", email="hamdi@gmail.com", password=bcrypt.generate_password_hash("Hamdi123!").decode('utf-8'), department='HR', role='employee', image='https://images.pexels.com/photos/764529/pexels-photo-764529.jpeg?auto=compress&cs=tinysrgb&w=600'),
         #     Employee(name="Anna Kioko", email="anna@gmail.com", password=bcrypt.generate_password_hash("Anna123!").decode('utf-8'), department='IT', role='employee', image='https://images.pexels.com/photos/11506216/pexels-photo-11506216.jpeg?auto=compress&cs=tinysrgb&w=600'),
         #     Employee(name="Sharon Mwende", email="sharon@gmail.com", password=bcrypt.generate_password_hash("Sharon123!").decode('utf-8'), department='Finance', role='employee', image='https://images.pexels.com/photos/20434986/pexels-photo-20434986/free-photo-of-jasmine-bajwa-model-shoot.jpeg?auto=compress&cs=tinysrgb&w=600'),
         #     Employee(name="Candy Bosibori", email="candy@gmail.com", password=bcrypt.generate_password_hash("Candy123!").decode('utf-8'), department='Operations', role='employee', image='https://images.pexels.com/photos/8864285/pexels-photo-8864285.jpeg?auto=compress&cs=tinysrgb&w=600')
@@ -31,73 +33,81 @@ if __name__ == '__main__':
         employees = [
             # Auto-generated employee instances
 
-            Employee(name="Sergio Jenkins", email="castroelizabeth@rodriguez.org", password=bcrypt.generate_password_hash("&N2p3Ogj$D").decode('utf-8'), department="Sales", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Amanda Parker", email="fphillips@gmail.com", password=bcrypt.generate_password_hash("^5ZY9E(5o0").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Ann Galvan", email="andrew84@gmail.com", password=bcrypt.generate_password_hash("2Is95ECR*j").decode('utf-8'), department="Marketing", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Thomas Townsend", email="whitejennifer@morse.com", password=bcrypt.generate_password_hash("003FvRtz&L").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="James Irwin", email="emmavega@hotmail.com", password=bcrypt.generate_password_hash("$A05Hqw7tL").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Ashley Torres", email="vaughntyler@yahoo.com", password=bcrypt.generate_password_hash("!ZQ1TKFnc2").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Andrea Krueger", email="gregory83@herman.com", password=bcrypt.generate_password_hash("$$3i2Eb87r").decode('utf-8'), department="Sales", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Hector Oconnell", email="pcampos@li-wilson.biz", password=bcrypt.generate_password_hash("Jx@57_RoV&").decode('utf-8'), department="HR", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Carolyn Quinn", email="scottanderson@gmail.com", password=bcrypt.generate_password_hash("zA7iBTt%e!").decode('utf-8'), department="Finance", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Julia Robertson", email="jasonmorales@herrera.com", password=bcrypt.generate_password_hash("yk7P4@T4U(").decode('utf-8'), department="Finance", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Eduardo Morse", email="timothy17@perry.org", password=bcrypt.generate_password_hash("!5N#T0*I$w").decode('utf-8'), department="Sales", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Brian Barrett", email="burtonalyssa@estrada-anderson.net", password=bcrypt.generate_password_hash(")VBYjmbt*8").decode('utf-8'), department="Finance", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Holly Rowe", email="tammy66@hotmail.com", password=bcrypt.generate_password_hash("LtzHqXoF*1").decode('utf-8'), department="Marketing", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Mark Kelly", email="velazquezjacob@greene-martin.com", password=bcrypt.generate_password_hash("(4!Rh1uY4*").decode('utf-8'), department="Operations", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Kenneth Salinas", email="johnsmith@washington.info", password=bcrypt.generate_password_hash("A0jV+QrP@M").decode('utf-8'), department="IT", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Jose Cruz", email="toddalexander@gmail.com", password=bcrypt.generate_password_hash("77FbCSe%$j").decode('utf-8'), department="Operations", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Christopher Parker", email="gilmorebeverly@schultz.com", password=bcrypt.generate_password_hash("un6KXm7S7%").decode('utf-8'), department="Sales", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="David Sullivan", email="robertgarcia@gmail.com", password=bcrypt.generate_password_hash("t(9ZN!pM!9").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Laura Williams", email="ycameron@fuller.org", password=bcrypt.generate_password_hash("+9msQP%yoI").decode('utf-8'), department="HR", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Justin Tanner", email="leonarddixon@hotmail.com", password=bcrypt.generate_password_hash("%Bs6TheuUh").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Kevin Martinez", email="mgonzalez@morrison.com", password=bcrypt.generate_password_hash(")G8zeKMo%A").decode('utf-8'), department="Finance", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Ann Conner", email="ana19@gmail.com", password=bcrypt.generate_password_hash(")51fD7XZHg").decode('utf-8'), department="Operations", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Robert Baker", email="peter72@salinas.com", password=bcrypt.generate_password_hash("Y$oQ3B*eFY").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Brittany Morrison", email="hoffmannathaniel@jordan-brown.com", password=bcrypt.generate_password_hash("Pu&c9QDpg_").decode('utf-8'), department="IT", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Joe Douglas", email="briangonzalez@parks.com", password=bcrypt.generate_password_hash("H#8G1VQe&V").decode('utf-8'), department="Operations", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Charles Jackson", email="delacruzabigail@jensen-lawrence.biz", password=bcrypt.generate_password_hash("aWXPg6EnL%").decode('utf-8'), department="HR", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Andrea Perez", email="wray@gmail.com", password=bcrypt.generate_password_hash("*U1YNa(i$s").decode('utf-8'), department="HR", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Larry Smith", email="morgankimberly@martin.com", password=bcrypt.generate_password_hash("t7MYo%)F%s").decode('utf-8'), department="Sales", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Julie White", email="moralesrobin@silva-scott.net", password=bcrypt.generate_password_hash("_g9h@PW@_2").decode('utf-8'), department="HR", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Kristine Diaz", email="scottwilliamson@knapp.com", password=bcrypt.generate_password_hash("nHF4&%W)_2").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Jorge Murray", email="ydunlap@turner-lee.com", password=bcrypt.generate_password_hash("h0WA95JxM#").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Diana Marquez", email="frobertson@marks-lopez.net", password=bcrypt.generate_password_hash("i@))9IqAjI").decode('utf-8'), department="IT", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Kimberly Castro", email="laura93@yahoo.com", password=bcrypt.generate_password_hash("^8Z8Pop8H1").decode('utf-8'), department="Marketing", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Danielle Russell", email="todd50@hotmail.com", password=bcrypt.generate_password_hash("9xQncDx1!Z").decode('utf-8'), department="IT", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Nicholas Chavez", email="joejones@yahoo.com", password=bcrypt.generate_password_hash("Q!$5HmnRm+").decode('utf-8'), department="Sales", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Michael Preston", email="rfarrell@hotmail.com", password=bcrypt.generate_password_hash("(XSSr(hKr8").decode('utf-8'), department="HR", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Timothy Smith", email="atkinsondavid@huff.com", password=bcrypt.generate_password_hash("_0COz$O7T0").decode('utf-8'), department="Finance", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Marcus Atkinson", email="ericfry@yahoo.com", password=bcrypt.generate_password_hash("nq%6RKVu$(").decode('utf-8'), department="IT", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Jason Dunn", email="stevenjohnson@yahoo.com", password=bcrypt.generate_password_hash("XW3Mf!ut6^").decode('utf-8'), department="Accounting", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Jennifer Harris", email="kristinaolsen@davis-randall.net", password=bcrypt.generate_password_hash("g1!g68GmLD").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Cindy Herring", email="vjohnson@gmail.com", password=bcrypt.generate_password_hash("a3TrVT!c+W").decode('utf-8'), department="HR", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Eric Huff", email="medinapaige@gmail.com", password=bcrypt.generate_password_hash("&yS4BZjjFc").decode('utf-8'), department="Finance", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Brooke Cantrell", email="david53@hotmail.com", password=bcrypt.generate_password_hash("cUpF1yVr*6").decode('utf-8'), department="Finance", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Diana Davila", email="melissa14@yahoo.com", password=bcrypt.generate_password_hash("4$4yJy#sD!").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Heather Perkins", email="uburgess@yahoo.com", password=bcrypt.generate_password_hash("q)D!9)Wq4X").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Janet Smith", email="sadams@gmail.com", password=bcrypt.generate_password_hash("*g1Pwv$ha1").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="George Carr", email="xsmith@johnson.biz", password=bcrypt.generate_password_hash("&%0gI0CgK7").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Gerald Atkinson", email="collinstodd@gibbs.com", password=bcrypt.generate_password_hash("*+Ho%U888w").decode('utf-8'), department="IT", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Thomas Cain", email="valeriejones@hart-taylor.com", password=bcrypt.generate_password_hash("A#5MYWwo0o").decode('utf-8'), department="Finance", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Kelly Wright", email="jeffreysmith@yahoo.com", password=bcrypt.generate_password_hash("62MUIxbG#(").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Garrett Walsh", email="marcuslogan@gmail.com", password=bcrypt.generate_password_hash("q9JSBu%u!w").decode('utf-8'), department="Sales", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Daniel Young", email="ooliver@hawkins-huerta.com", password=bcrypt.generate_password_hash("1L5aTnVw9$").decode('utf-8'), department="Operations", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Mary Donovan", email="lovesamantha@hensley-gamble.com", password=bcrypt.generate_password_hash("r2+N6*mo&g").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Stephanie Collins", email="debbiekelley@white-powell.com", password=bcrypt.generate_password_hash("$l%Oh@bz9W").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Amanda Robinson", email="jamesanderson@vazquez.com", password=bcrypt.generate_password_hash("+p^MlH@Vo4").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Kayla Brooks", email="jonesisabel@gmail.com", password=bcrypt.generate_password_hash("+I0VdafTBd").decode('utf-8'), department="Finance", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Michael Smith", email="qmiddleton@gmail.com", password=bcrypt.generate_password_hash("(S4tQJKk8L").decode('utf-8'), department="Sales", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Dustin Torres", email="sophiamccoy@boyle.com", password=bcrypt.generate_password_hash("zOn36Hy())").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Michael Whitehead", email="brett42@gmail.com", password=bcrypt.generate_password_hash("^f2JslYn00").decode('utf-8'), department="Administrative", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Angela Maddox", email="susan13@hotmail.com", password=bcrypt.generate_password_hash("3sWTsK&k%3").decode('utf-8'), department="IT", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Sara Price", email="briannaholland@murray.com", password=bcrypt.generate_password_hash("@aV1ho7r4j").decode('utf-8'), department="Sales", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Maria Martinez", email="tmartin@yahoo.com", password=bcrypt.generate_password_hash("f#4Ft89qMC").decode('utf-8'), department="Finance", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Brenda Scott", email="fstone@yahoo.com", password=bcrypt.generate_password_hash("%hDjQhIb17").decode('utf-8'), department="Marketing", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
-            Employee(name="Barbara Rivers", email="davidcochran@gmail.com", password=bcrypt.generate_password_hash("4pPD+@k^)9").decode('utf-8'), department="IT", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Liam Bennett", email="liam@gmail.com", password=bcrypt.generate_password_hash("liam.123!").decode('utf-8'), department="Sales", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Olivia Martinez", email="olivia@gmail.com", password=bcrypt.generate_password_hash("olivia.123!").decode('utf-8'), department="Marketing", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Noah Carter", email="noah@gmail.com", password=bcrypt.generate_password_hash("noah.123!").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Emma Hughes", email="emma@gmail.com", password=bcrypt.generate_password_hash("emma.123!").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Mason Rivera", email="mason@gmail.com", password=bcrypt.generate_password_hash("mason.123!").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Ava Collins", email="ava@gmail.com", password=bcrypt.generate_password_hash("ava.123!").decode('utf-8'), department="Sales", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Ethan Reed", email="ethan@gmail.com", password=bcrypt.generate_password_hash("ethan.123!").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Sophia Brooks", email="sophia@gmail.com", password=bcrypt.generate_password_hash("sophia.123!").decode('utf-8'), department="Marketing", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Logan Morgan", email="logan@gmail.com", password=bcrypt.generate_password_hash("logan.123!").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Isabella Perry", email="isabella@gmail.com", password=bcrypt.generate_password_hash("isabella.123!").decode('utf-8'), department="Administrative", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="James Scott", email="james@gmail.com", password=bcrypt.generate_password_hash("james.123!").decode('utf-8'), department="Sales", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Mia Sanders", email="mia@gmail.com", password=bcrypt.generate_password_hash("mia.123!").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Benjamin Price", email="benjamin@gmail.com", password=bcrypt.generate_password_hash("benjamin.123!").decode('utf-8'), department="Marketing", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Charlotte Foster", email="charlotte@gmail.com", password=bcrypt.generate_password_hash("charlotte.123!").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Alexander Bennett", email="alexander@gmail.com", password=bcrypt.generate_password_hash("alexander.123!").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Amelia Howard", email="amelia@gmail.com", password=bcrypt.generate_password_hash("amelia.123!").decode('utf-8'), department="Sales", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Daniel James", email="daniel@gmail.com", password=bcrypt.generate_password_hash("daniel.123!").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Harper Bryant", email="harper@gmail.com", password=bcrypt.generate_password_hash("harper.123!").decode('utf-8'), department="Marketing", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Matthew Kelly", email="matthew@gmail.com", password=bcrypt.generate_password_hash("matthew.123!").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Ella Cooper", email="ella@gmail.com", password=bcrypt.generate_password_hash("ella.123!").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Joseph Ward", email="joseph@gmail.com", password=bcrypt.generate_password_hash("joseph.123!").decode('utf-8'), department="Sales", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Abigail Brooks", email="abigail@gmail.com", password=bcrypt.generate_password_hash("abigail.123!").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Samuel Ward", email="samuel@gmail.com", password=bcrypt.generate_password_hash("samuel.123!").decode('utf-8'), department="Marketing", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Emily Reed", email="emily@gmail.com", password=bcrypt.generate_password_hash("emily.123!").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="David Hughes", email="david@gmail.com", password=bcrypt.generate_password_hash("david.123!").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Elizabeth Foster", email="elizabeth@gmail.com", password=bcrypt.generate_password_hash("elizabeth.123!").decode('utf-8'), department="Sales", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Andrew Diaz", email="andrew@gmail.com", password=bcrypt.generate_password_hash("andrew.123!").decode('utf-8'), department="Operations", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Grace Morgan", email="grace@gmail.com", password=bcrypt.generate_password_hash("grace.123!").decode('utf-8'), department="Marketing", role="admin", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Christopher Bailey", email="christopher@gmail.com", password=bcrypt.generate_password_hash("christopher.123!").decode('utf-8'), department="Accounting", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Victoria Hughes", email="victoria@gmail.com", password=bcrypt.generate_password_hash("victoria.123!").decode('utf-8'), department="Administrative", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
+            Employee(name="Nathaniel Brooks", email="nathaniel@gmail.com", password=bcrypt.generate_password_hash("nathaniel.123!").decode('utf-8'), department="Sales", role="employee", image="https://images.pexels.com/photos/819530/pexels-photo-819530.jpeg?auto=compress&cs=tinysrgb&w=600"),
 
         ]
 
         db.session.add_all(employees)
-        db.session.commit()    
+        db.session.commit()  
+
+        print("Seeding reviews and leaves...")
+
+        # Select 20% of employees (around 6)
+        sample_employees = random.sample(employees, k=max(1, len(employees)//5))
+
+        leave_types = ['sick', 'casual', 'vacation']
+        leave_statuses = ['pending', 'approved', 'rejected']
+        review_descriptions = [
+            "Excellent work ethic and dedication.",
+            "Needs improvement in communication skills.",
+            "Outstanding teamwork and leadership.",
+            "Punctual and reliable employee.",
+            "Shows initiative and creativity.",
+            "Could be more proactive in tasks."
+        ]
+
+        leaves = []
+        reviews = []
+
+        for emp in sample_employees:
+            # Add 1-2 reviews per employee
+            for _ in range(random.randint(1, 2)):
+                desc = random.choice(review_descriptions)
+                reviews.append(Review(description=desc, employee_id=emp.id))
+
+            # Add 1 leave per employee with random valid data
+            start = date.today() - timedelta(days=random.randint(30, 60))
+            end = start + timedelta(days=random.randint(1, 10))
+            leaves.append(Leave(
+                leaveType=random.choice(leave_types),
+                startDate=start,
+                endDate=end,
+                status=random.choice(leave_statuses),
+                employee_id=emp.id
+            ))
+
+        db.session.add_all(reviews)
+        db.session.add_all(leaves)
+        db.session.commit()
+
         print("Done seeding!")
