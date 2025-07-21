@@ -1,5 +1,5 @@
 from flask_bcrypt import Bcrypt
-from . import app
+from app import app
 from models import db, Employee, Review, Leave
 from sqlalchemy import text
 
